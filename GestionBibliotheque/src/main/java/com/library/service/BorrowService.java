@@ -1,3 +1,4 @@
+// BorrowService.java
 package com.library.service;
 
 import com.library.dao.BookDAO;
@@ -7,74 +8,58 @@ import com.library.model.Book;
 import com.library.model.Borrow;
 import com.library.model.Student;
 
+import java.util.Date;
 import java.util.List;
 
 public class BorrowService {
+
     private final BorrowDAO borrowDAO;
-    private final BookDAO bookDAO= new BookDAO();
-    private final StudentDAO studentDAO = new StudentDAO();
+    private final BookDAO bookDAO;
+    private final StudentDAO studentDAO;
 
-
-    public BorrowService() {
-        this.borrowDAO = new BorrowDAO();
+    public BorrowService(BorrowDAO borrowDAO, BookDAO bookDAO, StudentDAO studentDAO) {
+        this.borrowDAO = borrowDAO;
+        this.bookDAO = bookDAO;
+        this.studentDAO = studentDAO;
     }
 
-    public void borrowBook(Borrow borrow) {
-        borrowDAO.addBorrow(borrow);
-        System.out.println("Livre emprunté : " + borrow.getBook().getTitle());
+    public void borrowBook(int studentId, int bookId) {
+        Student student = studentDAO.getById(studentId);
+        Book book = bookDAO.getById(bookId);
+
+        if (student == null || book == null) {
+            throw new IllegalArgumentException("Invalid student ID or book ID.");
+        }
+
+        Borrow borrow = new Borrow(0, student.getName(), book.getTitle(), new Date(), null);
+        borrowDAO.save(borrow);
     }
 
-    public void displayBorrows() {
-        List<Borrow> borrows = borrowDAO.getAllBorrows();
-        if (borrows.isEmpty()) {
-            System.out.println("Aucun emprunt enregistré.");
-        } else {
-            for (Borrow borrow : borrows) {
-                System.out.println(borrow);
-            }
-        }
-    }
-    // Méthode pour emprunter un livre
-    public String borrowBook(int studentId, int bookId) {
-        // Vérifier l'existence de l'étudiant
-        Student student = studentDAO.getStudentById(studentId).orElse(null);
-        if (student == null) {
-            return "Étudiant ou livre non trouvé.";
-        }
-
-        // Vérifier l'existence et la disponibilité du livre
-        Book book = bookDAO.getBookById(bookId).orElse(null);
-        if (book == null) {
-            return "Étudiant ou livre non trouvé.";
-        }
-
-        if (!book.isAvailable()) {
-            return "Le livre n'est pas disponible.";
-        }
-
-        // Marquer le livre comme non disponible
-        book.setAvailable(false);
-        bookDAO.updateBook(book);
-        return "Livre emprunté avec succès!";
-    }
-    // Méthode pour retourner un livre
-    public String returnBook(int studentId, int bookId) {
-        // Vérifier l'existence de l'étudiant
-        Student student = studentDAO.getStudentById(studentId).orElse(null);
-        if (student == null) {
-            return "Étudiant non trouvé.";
-        }
-
-        // Vérifier l'existence du livre
-        Book book = bookDAO.getBookById(bookId).orElse(null);
-        if (book == null) {
-            return "Livre non trouvé.";
-        }
-
-        // Marquer le livre comme disponible
-        book.setAvailable(true);
-        bookDAO.updateBook(book);
-        return "Livre retourné avec succès!";
+    public List<Borrow> getAllBorrows() {
+        return borrowDAO.getAll();
     }
 
+    public Borrow getBorrowById(int id) {
+        return borrowDAO.getById(id);
+    }
+
+    public void updateBorrow(Borrow borrow) {
+        // Input validation can be added here
+        borrowDAO.update(borrow);
+    }
+
+    public void deleteBorrow(int id) {
+        borrowDAO.delete(id);
+    }
+
+    // You would likely have a returnBook method here as well
+    public void returnBook(int borrowId) {
+        Borrow borrow = borrowDAO.getById(borrowId);
+        if (borrow == null) {
+            throw new IllegalArgumentException("Invalid borrow ID.");
+        }
+
+        borrow.setReturnDate(new Date());
+        borrowDAO.update(borrow);
+    }
 }

@@ -1,69 +1,22 @@
+// Book.java
 package com.library.model;
 
 public class Book {
     private int id;
     private String title;
     private String author;
-    private String isbn;
-    private int publishedYear;
-    private boolean available; // Propriété ajoutée
+    private String publisher;
+    private int year;
 
-    // Constructeur par défaut
-    public Book() {
-    }
-
-    public Book(int id, String title, String author, String isbn, int publishedYear, boolean available) {
+    public Book(int id, String title, String author, String publisher, int year) {
         this.id = id;
         this.title = title;
         this.author = author;
-        this.isbn = isbn;
-        this.publishedYear = publishedYear;
-        this.available = available;
-    }
-    public Book(int id, String title, String author, boolean available) {
-        this.id = id;
-        this.title = title;
-        this.author = author;
-        this.available = available;
-    }
-    public Book(String title, String author, String isbn, int publishedYear, boolean available) {
-        this.title = title;
-        this.author = author;
-        this.isbn = isbn;
-        this.publishedYear = publishedYear;
-        this.available = available;
-    }
-    // Constructeur complet
-    public Book(int id, String title, String author, String isbn, int publishedYear) {
-        this.id = id;
-        this.title = title;
-        this.author = author;
-        this.isbn = isbn;
-        this.publishedYear = publishedYear;
-    }
-    // Getters et Setters
-    public boolean isAvailable() {
-        return available;
+        this.publisher = publisher;
+        this.year = year;
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
-    public Book(String title, String author, String isbn, int publishedYear) {
-        this.title = title;
-        this.author = author;
-        this.isbn = isbn;
-        this.publishedYear = publishedYear;
-    }
-
-    // Constructeur additionnel si nécessaire
-    public Book(String title, String author) {
-        this.title = title;
-        this.author = author;
-    }
-
-    // Getters et Setters
+    // Getters and setters for all fields
     public int getId() {
         return id;
     }
@@ -88,21 +41,19 @@ public class Book {
         this.author = author;
     }
 
-    public String getIsbn() {
-        return isbn;
+    public String getPublisher() {
+        return publisher;
     }
 
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
     }
 
-    public int getPublishedYear() {
-        return publishedYear;
+    public int getYear() {
+        return year;
     }
 
-    public void setPublishedYear(int publishedYear) {
-        this.publishedYear = publishedYear;
+    public void setYear(int year) {
+        this.year = year;
     }
-
-
 }

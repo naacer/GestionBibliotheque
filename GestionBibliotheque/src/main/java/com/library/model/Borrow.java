@@ -4,28 +4,21 @@ import java.util.Date;
 
 public class Borrow {
     private int id;
-    private Student student;
-    private Book book;
+    private String member; // This likely refers to the student's name or ID
+    private String book;  // This likely refers to the book's title or ID
     private Date borrowDate;
     private Date returnDate;
 
-    // Constructeur complet
-    public Borrow(int id, Student student, Book book, Date borrowDate, Date returnDate) {
+    public Borrow(int id, String member, String book, Date borrowDate, Date returnDate) {
         this.id = id;
-        this.student = student;
+        this.member = member;
         this.book = book;
         this.borrowDate = borrowDate;
         this.returnDate = returnDate;
     }
 
-    public Borrow(Student student, Book book, Date borrowDate, Date returnDate) {
-        this.student = student;
-        this.book = book;
-        this.borrowDate = borrowDate;
-        this.returnDate = returnDate;
-    }
+    // Getters and setters for all fields
 
-    // Getters et Setters
     public int getId() {
         return id;
     }
@@ -34,19 +27,19 @@ public class Borrow {
         this.id = id;
     }
 
-    public Student getStudent() {
-        return student;
+    public String getMember() {
+        return member;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public void setMember(String member) {
+        this.member = member;
     }
 
-    public Book getBook() {
+    public String getBook() {
         return book;
     }
 
-    public void setBook(Book book) {
+    public void setBook(String book) {
         this.book = book;
     }
 

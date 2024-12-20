@@ -1,3 +1,4 @@
+// Student.java
 package com.library.model;
 
 public class Student {
@@ -5,28 +6,13 @@ public class Student {
     private String name;
     private String email;
 
-
-    // Constructeur par défaut
-    public Student() {
-    }
-
-    // Constructeur complet
-    public Student(int id, String name) {
+    public Student(int id, String name, String email) {
         this.id = id;
         this.name = name;
+        this.email = email;
     }
 
-    public Student(String name) {
-        this.name = name;
-    }
-
-    public Student(int i, String alice, String mail) {
-        this.id=i;
-        this.name=alice;
-        this.email=mail;
-    }
-
-    // Getters et Setters
+    // Getters and setters for all fields
     public int getId() {
         return id;
     }

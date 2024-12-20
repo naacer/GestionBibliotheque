@@ -1,3 +1,4 @@
+// BookService.java
 package com.library.service;
 
 import com.library.dao.BookDAO;
@@ -6,44 +7,32 @@ import com.library.model.Book;
 import java.util.List;
 
 public class BookService {
+
     private final BookDAO bookDAO;
 
-    public BookService() {
-        this.bookDAO = new BookDAO();
+    public BookService(BookDAO bookDAO) {
+        this.bookDAO = bookDAO;
     }
-    public String deleteAllBooks() {
-        return bookDAO.deleteAll();
+
+    public List<Book> getAllBooks() {
+        return bookDAO.getAll();
     }
+
+    public Book getBookById(int id) {
+        return bookDAO.getById(id);
+    }
+
     public void addBook(Book book) {
-        bookDAO.addBook(book);
+        // Input validation can be added here before calling bookDAO.add()
+        bookDAO.add(book);
     }
 
-    public void displayBooks() {
-        List<Book> books = bookDAO.getAllBooks();
-        if (books.isEmpty()) {
-            System.out.println("Aucun livre dans la bibliothèque.");
-        } else {
-            for (Book book : books) {
-                System.out.println(book.getTitle() + " - " + book.getAuthor());
-            }
-        }
-    }
-
-    public Book findBookById(int id) {
-        return bookDAO.findBookById(id);
-    }
-    public void updateBook(int id, String title, String author, boolean available) {
-        Book book = bookDAO.getBookById(id).orElseThrow(() -> new RuntimeException("Book not found"));
-        book.setTitle(title);
-        book.setAuthor(author);
-        book.setAvailable(available);
-        bookDAO.updateBook(book);
-    }
-    public List<Book> searchBooksByTitle(String title) {
-        return bookDAO.findBooksByTitle(title);
+    public void updateBook(Book book) {
+        // Input validation can be added here before calling bookDAO.update()
+        bookDAO.update(book);
     }
 
     public void deleteBook(int id) {
-        bookDAO.deleteBook(id);
+        bookDAO.delete(id);
     }
 }

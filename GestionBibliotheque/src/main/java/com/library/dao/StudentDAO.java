@@ -6,104 +6,85 @@ import com.library.util.DbConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class StudentDAO {
 
-    // Méthode pour ajouter un étudiant
-    public void addStudent(Student student) {
-        String query = "INSERT INTO students (name, email,id) VALUES (?, ?,?)";
-        try (Connection conn = DbConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, student.getName());
-            stmt.setString(2, student.getEmail());
-            stmt.setInt(3,student.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    // Méthode pour mettre à jour un étudiant
-    public void updateStudent(Student student) {
-        String query = "UPDATE students SET name = ?, email = ? WHERE id = ?";
-        try (Connection conn = DbConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, student.getName());
-            stmt.setString(2, student.getEmail());
-            stmt.setInt(3, student.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public List<Student> getAllStudents() {
+    public List<Student> getAll() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students";
         try (Connection connection = DbConnection.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
+
             while (resultSet.next()) {
-                students.add(new Student(resultSet.getInt("id"), resultSet.getString("name")));
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                String email = resultSet.getString("email");
+                students.add(new Student(id, name, email));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error getting all students: " + e.getMessage());
         }
         return students;
     }
 
-    public Student findStudentById(int id) {
+    public Student getById(int id) {
         String sql = "SELECT * FROM students WHERE id = ?";
         try (Connection connection = DbConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return new Student(resultSet.getInt("id"), resultSet.getString("name"));
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String name = resultSet.getString("name");
+                    String email = resultSet.getString("email");
+                    return new Student(id, name, email);
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error getting student by ID: " + e.getMessage());
         }
         return null;
     }
-    // Méthode pour obtenir un étudiant par ID
-    public Optional<Student> getStudentById(int id) {
-        String query = "SELECT * FROM students WHERE id = ?";
-        try (Connection conn = DbConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                Student student = new Student(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("email")
-                );
-                return Optional.of(student);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
-    // Méthode pour supprimer un étudiant
-    public void deleteStudent(int id) {
-        String query = "DELETE FROM students WHERE id = ?";
-        try (Connection conn = DbConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public void deleteAllStudents() {
-        String query = "DELETE FROM students";
-        try (PreparedStatement statement = DbConnection.getConnection().prepareStatement(query)) {
+
+    public void add(Student student) {
+        String sql = "INSERT INTO students (name, email) VALUES (?, ?)";
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, student.getName());
+            statement.setString(2, student.getEmail());
+
             statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Erreur");
+            System.err.println("Error adding student: " + e.getMessage());
+        }
+    }
+
+    public void update(Student student) {
+        String sql = "UPDATE students SET name = ?, email = ? WHERE id = ?";
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, student.getName());
+            statement.setString(2, student.getEmail());
+            statement.setInt(3, student.getId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error updating student: " + e.getMessage());
+        }
+    }
+
+    public void delete(int id) {
+        String sql = "DELETE FROM students WHERE id = ?";
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting student: " + e.getMessage());
         }
     }
 }

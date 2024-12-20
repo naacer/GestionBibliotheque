@@ -1,99 +1,165 @@
 package com.library;
 
-import com.library.service.BorrowService;
-import com.library.service.BookService;
-import com.library.service.StudentService;
+import com.library.dao.BookDAO;
+import com.library.dao.BorrowDAO;
+import com.library.dao.StudentDAO;
 import com.library.model.Book;
-import com.library.model.Student;
 import com.library.model.Borrow;
-import com.library.dao.BorrowDAO;  // Importer BorrowDAO
+import com.library.model.Student;
+import com.library.service.BookService;
+import com.library.service.BorrowService;
+import com.library.service.StudentService;
+
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+
+    private static final BookDAO bookDAO = new BookDAO();
+    private static final StudentDAO studentDAO = new StudentDAO();
+    private static final BorrowDAO borrowDAO = new BorrowDAO();
+
+    private static final BookService bookService = new BookService(bookDAO);
+    private static final StudentService studentService = new StudentService(studentDAO);
+    private static final BorrowService borrowService = new BorrowService(borrowDAO, bookDAO, studentDAO);
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Création des services
-        BookService bookService = new BookService();
-        Student student = new Student(1, "John Doe");
-        StudentService studentService = new StudentService();
-        BorrowDAO borrowDAO = new BorrowDAO();  // Création de BorrowDAO
-        BorrowService borrowService = new BorrowService();  // Passer BorrowDAO au constructeur de BorrowService
-        Book book = new Book("Effective Java", "Joshua Bloch", "123456", 2017);
-        Borrow borrow = new Borrow(1, student, book, new Date(), new Date());
+        while (true) {
+            System.out.println("\nLibrary Management System");
+            System.out.println("1. Add book");
+            System.out.println("2. View all books");
+            System.out.println("3. Add student");
+            System.out.println("4. View all students");
+            System.out.println("5. Borrow book");
+            System.out.println("6. View all borrows");
+            System.out.println("7. Return book");
+            System.out.println("8. Exit");
+            System.out.print("Enter your choice: ");
 
-        boolean running = true;
-
-        while (running) {
-            System.out.println("\n===== Menu =====");
-            System.out.println("1. Ajouter un livre");
-            System.out.println("2. Afficher les livres");
-            System.out.println("3. Ajouter un étudiant");
-            System.out.println("4. Afficher les étudiants");
-            System.out.println("5. Emprunter un livre");
-            System.out.println("6. Afficher les emprunts");
-            System.out.println("7. Quitter");
-
-            System.out.print("Choisir une option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();  // Consommer la ligne restante après l'entier
+            scanner.nextLine(); // Consume newline
 
             switch (choice) {
                 case 1:
-                    System.out.print("Entrez le titre du livre: ");
-                    String title = scanner.nextLine();
-                    System.out.print("Entrez l'auteur du livre: ");
-                    String author = scanner.nextLine();
-                    book = new Book(title, author);
-                    bookService.addBook(book);
+                    addBook(scanner);
                     break;
-
                 case 2:
-                    bookService.displayBooks();
+                    viewAllBooks();
                     break;
-
                 case 3:
-                    System.out.print("Entrez le nom de l'étudiant: ");
-                    String studentName = scanner.nextLine();
-                    student = new Student(studentName);
-                    studentService.addStudent(student);
+                    addStudent(scanner);
                     break;
-
                 case 4:
-                    studentService.displayStudents();
+                    viewAllStudents();
                     break;
-
                 case 5:
-                    System.out.print("Entrez l'ID de l'étudiant: ");
-                    int studentId = scanner.nextInt();
-                    System.out.print("Entrez l'ID du livre: ");
-                    int bookId = scanner.nextInt();
-                    Student studentForBorrow = studentService.findStudentById(studentId);
-                    Book bookForBorrow = bookService.findBookById(bookId);
-                    if (studentForBorrow != null && bookForBorrow != null) {
-                        // Créer un objet Borrow avec les informations nécessaires
-                        borrow = new Borrow(studentForBorrow, bookForBorrow, new Date(), null);
-                        borrowService.borrowBook(borrow);  // Appel de la méthode avec l'objet Borrow
-                    } else {
-                        System.out.println("Étudiant ou livre introuvable.");
-                    }
+                    borrowBook(scanner);
                     break;
-
                 case 6:
-                    borrowService.displayBorrows();
+                    viewAllBorrows();
                     break;
-
                 case 7:
-                    running = false;
-                    System.out.println("Au revoir!");
+                    returnBook(scanner);
                     break;
-
+                case 8:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
                 default:
-                    System.out.println("Option invalide.");
+                    System.out.println("Invalid choice. Please try again.");
             }
         }
+    }
 
-        scanner.close();
+    private static void addBook(Scanner scanner) {
+        System.out.print("Enter title: ");
+        String title = scanner.nextLine();
+        System.out.print("Enter author: ");
+        String author = scanner.nextLine();
+        System.out.print("Enter publisher: ");
+        String publisher = scanner.nextLine();
+        System.out.print("Enter year: ");
+        int year = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        Book book = new Book(0, title, author, publisher, year);
+        bookService.addBook(book);
+        System.out.println("Book added successfully.");
+    }
+
+    private static void viewAllBooks() {
+        List<Book> books = bookService.getAllBooks();
+        if (books.isEmpty()) {
+            System.out.println("No books found.");
+        } else {
+            for (Book book : books) {
+                System.out.println(book.getId() + ". " + book.getTitle() + " by " + book.getAuthor());
+            }
+        }
+    }
+
+    private static void addStudent(Scanner scanner) {
+        System.out.print("Enter name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+
+        Student student = new Student(0, name, email);
+        studentService.addStudent(student);
+        System.out.println("Student added successfully.");
+    }
+
+    private static void viewAllStudents() {
+        List<Student> students = studentService.getAllStudents();
+        if (students.isEmpty()) {
+            System.out.println("No students found.");
+        } else {
+            for (Student student : students) {
+                System.out.println(student.getId() + ". " + student.getName() + " (" + student.getEmail() + ")");
+            }
+        }
+    }
+
+    private static void borrowBook(Scanner scanner) {
+        System.out.print("Enter student ID: ");
+        int studentId = scanner.nextInt();
+        System.out.print("Enter book ID: ");
+        int bookId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        try {
+            borrowService.borrowBook(studentId, bookId);
+            System.out.println("Book borrowed successfully.");
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private static void viewAllBorrows() {
+        List<Borrow> borrows = borrowService.getAllBorrows();
+        if (borrows.isEmpty()) {
+            System.out.println("No borrows found.");
+        } else {
+            for (Borrow borrow : borrows) {
+                System.out.println(borrow.getId() + ". " + borrow.getBook() + " borrowed by " + borrow.getMember()
+                        + " on " + borrow.getBorrowDate());
+            }
+        }
+    }
+
+    private static void returnBook(Scanner scanner) {
+        System.out.print("Enter borrow ID: ");
+        int borrowId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        try {
+            borrowService.returnBook(borrowId);
+            System.out.println("Book returned successfully.");
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
     }
 }

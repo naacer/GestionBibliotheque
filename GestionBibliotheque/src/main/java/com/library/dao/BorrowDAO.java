@@ -1,8 +1,6 @@
 package com.library.dao;
 
-import com.library.model.Book;
 import com.library.model.Borrow;
-import com.library.model.Student;
 import com.library.util.DbConnection;
 
 import java.sql.*;
@@ -11,39 +9,97 @@ import java.util.List;
 
 public class BorrowDAO {
 
-    public void addBorrow(Borrow borrow) {
-        String sql = "INSERT INTO borrows (student_id, book_id, borrow_date, return_date) VALUES (?, ?, ?, ?)";
-        try (Connection connection = DbConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, borrow.getStudent().getId());
-            preparedStatement.setInt(2, borrow.getBook().getId());
-            preparedStatement.setDate(3, new java.sql.Date(borrow.getBorrowDate().getTime()));
-            preparedStatement.setDate(4, borrow.getReturnDate() != null ? new java.sql.Date(borrow.getReturnDate().getTime()) : null);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<Borrow> getAllBorrows() {
+    public List<Borrow> getAll() {
         List<Borrow> borrows = new ArrayList<>();
         String sql = "SELECT * FROM borrows";
         try (Connection connection = DbConnection.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
+
             while (resultSet.next()) {
-                // Vous devrez récupérer les détails de l'étudiant et du livre à partir des autres tables
-                borrows.add(new Borrow(
-                        resultSet.getInt("id"),
-                        new Student(resultSet.getInt("student_id"), "Nom de l'étudiant"), // Remplacer par un lookup réel
-                        new Book(resultSet.getInt("book_id"), "Titre du livre", "Auteur", "ISBN", 2020), // Remplacer par un lookup réel
-                        resultSet.getDate("borrow_date"),
-                        resultSet.getDate("return_date")
-                ));
+                int id = resultSet.getInt("id");
+                String member = resultSet.getString("member");
+                String book = resultSet.getString("book");
+                Date borrowDate = resultSet.getDate("borrow_date");
+                Date returnDate = resultSet.getDate("return_date");
+                borrows.add(new Borrow(id, member, book, borrowDate, returnDate));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error getting all borrows: " + e.getMessage());
         }
         return borrows;
+    }
+
+    public Borrow getById(int id) {
+        String sql = "SELECT * FROM borrows WHERE id = ?";
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String member = resultSet.getString("member");
+                    String book = resultSet.getString("book");
+                    Date borrowDate = resultSet.getDate("borrow_date");
+                    Date returnDate = resultSet.getDate("return_date");
+                    return new Borrow(id, member, book, borrowDate, returnDate);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting borrow by ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // In BorrowDAO.java, within the save() method
+
+    public void save(Borrow borrow) {
+        String query = "INSERT INTO borrows (member, book, borrow_date, return_date) VALUES (?, ?, ?, ?)";
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+
+            stmt.setString(1, borrow.getMember());
+            stmt.setString(2, borrow.getBook());
+            stmt.setDate(3, new java.sql.Date(borrow.getBorrowDate().getTime()));
+
+            // Handle potential null for returnDate
+            if (borrow.getReturnDate() != null) {
+                stmt.setDate(4, new java.sql.Date(borrow.getReturnDate().getTime()));
+            } else {
+                stmt.setNull(4, java.sql.Types.DATE);
+            }
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error saving borrow: " + e.getMessage());
+        }
+    }
+    public void update(Borrow borrow) {
+        String sql = "UPDATE borrows SET member = ?, book = ?, borrow_date = ?, return_date = ? WHERE id = ?";
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, borrow.getMember());
+            statement.setString(2, borrow.getBook());
+            statement.setDate(3, new java.sql.Date(borrow.getBorrowDate().getTime()));
+            statement.setDate(4, new java.sql.Date(borrow.getReturnDate().getTime()));
+            statement.setInt(5, borrow.getId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error updating borrow: " + e.getMessage());
+        }
+    }
+
+    public void delete(int id) {
+        String sql = "DELETE FROM borrows WHERE id = ?";
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting borrow: " + e.getMessage());
+        }
     }
 }
